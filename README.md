@@ -15,7 +15,7 @@ To do so, we are going to use open source tweets to train our models as Air Para
 
 ## 3. Steps
 To address the customer problem, we will follow these steps:
-- **Data Collection**: Gather a dataset of tweets, including both positive and negative sentiments.
+- **Data Collection**: Gather a dataset of tweets, including both positive and negative sentiments. The dataset is available [here](https://www.kaggle.com/datasets/kazanova/sentiment140)
 - **Data Preprocessing**: Clean the data by removing noise (such as special characters and stop words) and preparing it for analysis (e.g., tokenization).
 - **Exploratory Data Analysis**: Analyze the dataset to understand the sentiment distribution, common words, and patterns that can inform our model development.
 - **Model Development**: Experiment with different machine learning models, including logistic regression, and deep learning approaches like neural networks, to predict sentiment.

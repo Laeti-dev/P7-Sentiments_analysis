@@ -24,3 +24,39 @@ To address the customer problem, we will follow these steps:
 - **MLOps Integration**: Implement a pipeline for continuous integration and continuous deployment (CI/CD), manage experiments with MLFlow, and automate testing procedures.
 - **Testing**: Conduct local tests of our API to ensure it functions correctly before finalizing it for deployment.
 - **Feedback Loop**: After deployment, monitor the model’s performance and gather feedback for future improvements.
+
+## 4. Setup Virtual Environment
+
+To ensure a clean and isolated environment for this project, it is recommended to use a virtual environment. This project uses `uv`, a fast Python package installer and resolver.
+
+### Steps:
+
+1.  **Install `uv`** (if you don't have it):
+    ```bash
+    pip install uv
+    ```
+
+2.  **Create the virtual environment**:
+    Navigate to the project's root directory and run:
+    ```bash
+    uv venv
+    ```
+    This will create a `.venv` directory containing the Python interpreter and libraries.
+
+3.  **Activate the virtual environment**:
+    On macOS and Linux:
+    ```bash
+    source .venv/bin/activate
+    ```
+    On Windows:
+    ```bash
+    .venv\Scripts\activate
+    ```
+
+4.  **Install dependencies**:
+    Once the virtual environment is activated, install the required packages from the `requirements.txt` file:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+Now you are ready to run the notebooks and scripts in this project.

@@ -4,3 +4,5 @@ seaborn
 nltk
 wordcloud
 scikit-learn
+ipywidgets
+mlflow

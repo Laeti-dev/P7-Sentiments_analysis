@@ -1,5 +1,6 @@
 # P7-Sentiments_analysis
 
+
 ## 1. Academic goals
 In this project, the academic goals revolve around developing and deploying machine learning models, specifically for sentiment analysis using deep learning techniques. The key objectives include:
 - **Model Development**: Learning to create and optimize various predictive models ranging from logistic regression to deep neural networks.
@@ -9,12 +10,32 @@ In this project, the academic goals revolve around developing and deploying mach
 - **Experimentation Management**: Using tools like MLFlow to manage and track experiments that involve model training and evaluations.
 These goals align to enhance an expertise in AI development, focusing on both the technical aspects and the ability to share your findings effectively.
 
-## 2. Client needs
+## 2. Project structure
+```txt
+P7-sentiments_analysis/
+├── notebooks/              # Notebooks Jupyter pour l’exploration
+│   ├── ikusawa_laetitia_1_API_092025.ipynb #TODO
+│   ├── ikusawa_laetitia_2_scripts_notebook_modélisation_092025/
+│   │   ├── P7_basic_ML_models.ipynb
+│   │   ├── P7_eda.ipynb
+│   │   ├── P7_advanced_model.ipynb #TODO
+│   │   ├── P7_BERT.ipynb #TODO
+│   └── ikusawa_laetitia_3_dossier_code_092025 #TODO
+│   ├── ikusawa_laetitia_4_interface_test_API_092025 #TODO
+│   ├── ikusawa_laetitia_5_blog_092025 #TODO
+├── requirements.txt
+├── README.md
+├── .gitignore
+```
+
+## 3. Client needs
 Our customer, Air Paradis, is looking to anticipate and manage potential negative feedback (bad buzz) on social media. By accurately predicting the sentiment related to tweets, the company aims to proactively address customer concerns and enhance its reputation. This involves developing an AI solution that can analyze social media sentiment effectively, allowing the company to respond promptly to any issues that may arise.
 To do so, we are going to use open source tweets to train our models as Air Paradis doesn't have enough data to provide.
 
-## 3. Steps
-To address the customer problem, we will follow these steps:
+## 4. Steps
+Before we address the problem, we are going to setup a virtual environment using [UV](https://docs.astral.sh/uv/getting-started/).
+
+Then we will be able to start the project following these steps:
 - **Data Collection**: Gather a dataset of tweets, including both positive and negative sentiments. The dataset is available [here](https://www.kaggle.com/datasets/kazanova/sentiment140)
 - **Data Preprocessing**: Clean the data by removing noise (such as special characters and stop words) and preparing it for analysis (e.g., tokenization).
 - **Exploratory Data Analysis**: Analyze the dataset to understand the sentiment distribution, common words, and patterns that can inform our model development.
@@ -34,29 +55,34 @@ To ensure a clean and isolated environment for this project, it is recommended t
 1.  **Install `uv`** (if you don't have it):
     ```bash
     pip install uv
-    ```
+    ````
 
 2.  **Create the virtual environment**:
     Navigate to the project's root directory and run:
     ```bash
-    uv venv
+    uv venv .uv-venv
     ```
-    This will create a `.venv` directory containing the Python interpreter and libraries.
+
 
 3.  **Activate the virtual environment**:
     On macOS and Linux:
     ```bash
-    source .venv/bin/activate
+    source .uv-venv/bin/activate
     ```
     On Windows:
     ```bash
     .venv\Scripts\activate
     ```
 
+
 4.  **Install dependencies**:
     Once the virtual environment is activated, install the required packages from the `requirements.txt` file:
     ```bash
     pip install -r requirements.txt
+    ```
+    or a single libraby
+    ```bash
+    uv pip install mlflow
     ```
 
 Now you are ready to run the notebooks and scripts in this project.

@@ -198,4 +198,4 @@ cython_debug/
 /mlruns/
 /mlartifacts/
 /notebooks/mlruns/
-/notebooks/content/basic-model/
+/notebooks/content/

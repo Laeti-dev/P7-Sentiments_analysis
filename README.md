@@ -46,7 +46,9 @@ Then we will be able to start the project following these steps:
 - **Testing**: Conduct local tests of our API to ensure it functions correctly before finalizing it for deployment.
 - **Feedback Loop**: After deployment, monitor the model’s performance and gather feedback for future improvements.
 
-## 4. Setup Virtual Environment
+## 4. Setup
+
+You should have a .env looking like .env_sample
 
 To ensure a clean and isolated environment for this project, it is recommended to use a virtual environment. This project uses `uv`, a fast Python package installer and resolver.
 
@@ -60,7 +62,7 @@ To ensure a clean and isolated environment for this project, it is recommended t
 2.  **Create the virtual environment**:
     Navigate to the project's root directory and run:
     ```bash
-    uv venv .uv-venv
+    uv venv --python 3.12
     ```
 
 

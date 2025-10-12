@@ -65,6 +65,11 @@ To ensure a clean and isolated environment for this project, it is recommended t
     uv venv --python 3.12
     ```
 
+    For the transformers, if you use a mac, you will need to downgrade yout python version du 3.10
+    ```bash
+      uv venv --python 3.10
+    ```
+
 
 3.  **Activate the virtual environment**:
     On macOS and Linux:

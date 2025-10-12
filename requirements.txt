@@ -19,3 +19,6 @@ mlflow==3.3.2
 tensorflow-macos==2.16.2
 tensorflow-metal==1.2.0
 ipykernel
+
+transformers==4.57.0
+torch==2.8.0

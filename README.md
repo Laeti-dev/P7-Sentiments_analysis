@@ -93,3 +93,9 @@ To ensure a clean and isolated environment for this project, it is recommended t
     ```
 
 Now you are ready to run the notebooks and scripts in this project.
+
+5. **Streamlit App**
+  To start streamlit local server
+  ```bash
+    streamit run main.py
+    ```

@@ -199,3 +199,11 @@ cython_debug/
 /mlartifacts/
 /notebooks/mlruns/
 /notebooks/content/
+artifacts/
+/runs/logs/
+/runs/tmp/
+/runs/__pycache__/
+/runs/.ipynb_checkpoints/
+checkpoints/
+/models/
+notebooks/ROC_AUC/

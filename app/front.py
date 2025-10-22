@@ -33,8 +33,12 @@ def get_sentiment_prediction(text):
         if response.status_code == 200:
             return response.json()
         else:
-            st.error(f"Error: API returned status code {response.status_code}")
-            st.error(f"Response: {response.text}")
+            # Try to extract error message from response
+            try:
+                error_detail = response.json().get("detail", response.text)
+            except Exception:
+                error_detail = response.text
+            st.error(f"API Error ({response.status_code}): {error_detail}")
             return None
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to API: {str(e)}")

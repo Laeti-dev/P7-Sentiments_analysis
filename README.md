@@ -99,3 +99,8 @@ Now you are ready to run the notebooks and scripts in this project.
   ```bash
     streamit run main.py
     ```
+
+6. **Run unit test**
+```bash
+pytest
+```

@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 from typing import Dict, Union
 import tensorflow as tf
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
@@ -23,11 +24,21 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "model"
 MODEL_DIR.mkdir(exist_ok=True)
 
-# Create FastAPI application
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
+    global model, tokenizer
+    if model is None or tokenizer is None:
+        load_model_and_tokenizer()
+    yield
+    # (Optional) Shutdown code
+
 app = FastAPI(
     title="Sentiment Analysis API",
     description="API for predicting sentiment from text using a pre-trained model",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Define request model
@@ -95,15 +106,6 @@ def load_model_and_tokenizer():
 # Load model and tokenizer at startup
 load_model_and_tokenizer()
 
-@app.on_event("startup")
-def ensure_model_loaded():
-    """
-    Ensure model and tokenizer are loaded at FastAPI startup.
-    """
-    global model, tokenizer
-    if model is None or tokenizer is None:
-        load_model_and_tokenizer()
-
 @app.get("/")
 def read_root():
     """Root endpoint"""
@@ -123,6 +125,10 @@ def predict_sentiment(request: SentimentRequest):
     if model is None or tokenizer is None:
         raise HTTPException(status_code=500, detail="Model or tokenizer not loaded")
 
+    # Validation for missing or empty text
+    if not hasattr(request, "text") or not isinstance(request.text, str) or not request.text.strip():
+        raise HTTPException(status_code=422, detail="A text should be provided for sentiment analysis.")
+
     try:
         # Get the text from the request
         text = request.text
@@ -137,7 +143,10 @@ def predict_sentiment(request: SentimentRequest):
         )
 
         # Make prediction
-        prediction = model.predict(padded_sequences)
+        try:
+            prediction = model.predict(padded_sequences)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
         # Process the prediction (assuming binary classification)
         predicted_class = int(prediction[0][0] > 0.5)  # Threshold at 0.5
@@ -159,6 +168,8 @@ def predict_sentiment(request: SentimentRequest):
             probabilities=probs_dict
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 

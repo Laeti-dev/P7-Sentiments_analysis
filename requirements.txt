@@ -30,3 +30,6 @@ fastapi==0.110.0
 uvicorn==0.30.0
 pydantic==2.7.0
 requests==2.32.3
+
+# Unit testing
+pytest==8.4.2

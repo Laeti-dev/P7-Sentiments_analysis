@@ -104,3 +104,5 @@ Now you are ready to run the notebooks and scripts in this project.
 ```bash
 pytest
 ```
+
+[![Deploy to Cloud Run](https://github.com/Laeti-dev/P7-sentiments_analysis/actions/workflows/deploy.yml/badge.svg)](https://github.com/YOUR-USERNAME/YOUR-REPO/actions/workflows/deploy.yml)

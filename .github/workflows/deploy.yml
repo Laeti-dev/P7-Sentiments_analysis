@@ -1,0 +1,104 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  REPO_NAME: ${{ secrets.GCP_REPO_NAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/backend:latest
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/backend:${{ github.sha }}
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/frontend:latest
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/frontend:${{ github.sha }}
+
+      - name: Deploy Backend to Cloud Run
+        id: deploy-backend
+        run: |
+          gcloud run deploy sentiment-backend \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/backend:latest \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --allow-unauthenticated \
+            --port=8000 \
+            --memory=2Gi \
+            --cpu=2 \
+            --timeout=300 \
+            --min-instances=0 \
+            --max-instances=10 \
+            --quiet
+
+      - name: Get Backend URL
+        id: backend-url
+        run: |
+          BACKEND_URL=$(gcloud run services describe sentiment-backend \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "Backend URL: $BACKEND_URL"
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy sentiment-frontend \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/frontend:latest \
+            --platform=managed \
+            --region=${{ env.REGION }} \
+            --allow-unauthenticated \
+            --port=8501 \
+            --memory=1Gi \
+            --cpu=1 \
+            --timeout=300 \
+            --min-instances=0 \
+            --max-instances=5 \
+            --set-env-vars="API_URL=${{ steps.backend-url.outputs.url }}/predict" \
+            --quiet
+
+      - name: Get Frontend URL
+        run: |
+          FRONTEND_URL=$(gcloud run services describe sentiment-frontend \
+            --region=${{ env.REGION }} \
+            --format='value(status.url)')
+          echo "✅ Deployment successful!"
+          echo "🔧 Backend URL: ${{ steps.backend-url.outputs.url }}"
+          echo "📱 Frontend URL: $FRONTEND_URL"

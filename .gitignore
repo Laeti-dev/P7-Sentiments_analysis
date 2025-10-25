@@ -209,3 +209,5 @@ checkpoints/
 notebooks/ROC_AUC/
 
 backend/model/
+
+gcp-key.json

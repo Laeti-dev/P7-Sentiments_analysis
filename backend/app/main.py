@@ -61,8 +61,8 @@ class FeedbackRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 # Load the pre-trained model and tokenizer
-MODEL_PATH = "models/Bidirectional_GRU_glove/Bidirectional_GRU_glove_model.h5"
-TOKENIZER_PATH = "models/Bidirectional_GRU_glove/tokenizer.pkl"
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "Bidirectional_GRU_glove_model.h5")
+TOKENIZER_PATH = os.path.join(os.path.dirname(__file__), "model", "tokenizer.pkl")
 
 model = None  # --- IGNORE ---
 tokenizer = None
@@ -82,11 +82,17 @@ def load_model_and_tokenizer():
     """Load model and tokenizer from specified paths"""
     global model, tokenizer
     try:
+        print(f"Looking for model at: {MODEL_PATH}")
+        print(f"Looking for tokenizer at: {TOKENIZER_PATH}")
         for path in [MODEL_PATH, TOKENIZER_PATH]:
             if not os.path.exists(path):
                 raise FileNotFoundError(f"File not found: {path}")
 
-        model = tf.keras.models.load_model(str(MODEL_PATH))
+        try:
+            model = tf.keras.models.load_model(str(MODEL_PATH))
+        except Exception as e:
+            print(f"Model loading error: {e}")
+            raise RuntimeError(f"Model loading error: {e}")
 
         with open(TOKENIZER_PATH, 'rb') as f:
             tokenizer = pickle.load(f)
@@ -125,11 +131,11 @@ def predict_sentiment(request: SentimentRequest):
     if model is None or tokenizer is None:
         raise HTTPException(status_code=500, detail="Model or tokenizer not loaded")
 
-    # Validation for missing or empty text
-    if not hasattr(request, "text") or not isinstance(request.text, str) or not request.text.strip():
-        raise HTTPException(status_code=422, detail="A text should be provided for sentiment analysis.")
 
     try:
+        # Validation for missing or empty text
+        if not hasattr(request, "text") or not isinstance(request.text, str) or not request.text.strip():
+            raise HTTPException(status_code=422, detail="A text should be provided for sentiment analysis.")
         # Get the text from the request
         text = request.text
 

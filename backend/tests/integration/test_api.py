@@ -10,7 +10,15 @@ sys.path.append(
     )
 )
 
-from api import app
+import importlib.util
+
+api_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../api.py")
+)
+spec = importlib.util.spec_from_file_location("api", api_path)
+api = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(api)
+app = api.app
 
 client = TestClient(app)
 
@@ -21,7 +29,7 @@ def test_root_endpoint():
 
 def test_model_and_tokenizer_loaded():
     # Import model and tokenizer from the api module
-    from api import model, tokenizer
+    from app.backend.main import model, tokenizer
     assert model is not None, "Model should be loaded"
     assert tokenizer is not None, "Tokenizer should be loaded"
 
@@ -65,7 +73,7 @@ def test_predict_empty_text():
 
 def test_predict_model_or_tokenizer_missing(monkeypatch):
     # Simulate missing model and tokenizer
-    from api import model, tokenizer
+    from app.backend.main import model, tokenizer
 
     monkeypatch.setattr("api.model", None)
     monkeypatch.setattr("api.tokenizer", None)
@@ -78,7 +86,7 @@ def test_predict_model_or_tokenizer_missing(monkeypatch):
 
 def test_predict_internal_error(monkeypatch):
     # Simulate an error during model prediction
-    from api import model
+    from app.backend.main import model
 
     def mock_predict(*args, **kwargs):
         raise RuntimeError("Simulated prediction error")

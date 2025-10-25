@@ -3,6 +3,7 @@ import requests
 import json
 import plotly.graph_objects as go
 import pandas as pd
+import os
 
 # Set page configuration
 st.set_page_config(
@@ -19,7 +20,7 @@ Enter your text below and click 'Analyze' to see the results.
 """)
 
 # API URL - change this if your API is hosted elsewhere
-API_URL = "http://localhost:8000/predict"
+API_URL = os.environ.get("API_URL", "http://localhost:8000/predict")
 
 # Function to call API and get prediction
 def get_sentiment_prediction(text):
@@ -126,4 +127,3 @@ with st.expander("How does this work?"):
 # Footer
 st.markdown("---")
 st.markdown("© 2023 Sentiment Analysis Tool | Built with Streamlit and FastAPI")
-

@@ -9,7 +9,18 @@ sys.path.append(
     )
 )
 
-import front
+# Change import front to use the correct path for test discovery
+import importlib.util
+
+front_path = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../front.py")
+)
+spec = importlib.util.spec_from_file_location("front", front_path)
+front = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(front)
+
+# This file contains unit tests for the Streamlit front-end logic (specifically, get_sentiment_prediction).
+# These are unit tests, not integration tests, because they mock the requests and Streamlit API.
 
 def test_get_sentiment_prediction_success(monkeypatch):
     class MockResponse:

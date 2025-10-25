@@ -207,3 +207,5 @@ artifacts/
 checkpoints/
 /models/
 notebooks/ROC_AUC/
+
+backend/model/

@@ -201,7 +201,7 @@ If you want to deploy them individually when only one changes, use the alternate
 
 ***
 
-## **🎉 You now have professional CI/CD!**
+## **🎉 You now have CI/CD!**
 
 - Your Docker images are always built (`linux/amd64`) and uploaded automatically
 - Your Cloud Run backend/frontend are always up to date with your latest `main` branch

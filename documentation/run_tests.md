@@ -50,6 +50,10 @@ pytest tests/ --cov=app --cov-report=html
 
 
 ### **7. (Optional) Use the test runner script to run everything:**
+Make the script executable
+```
+chmod +x run_tests.sh
+```
 
 ```
 ./run_tests.sh

@@ -13,12 +13,20 @@ from contextlib import asynccontextmanager
 import uuid
 from dotenv import load_dotenv
 import logging
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 load_dotenv()
 
 # Configuration de MLflow
 mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
 run_id = os.getenv("RUN_ID")
+APPINSIGHTS_KEY = os.getenv("APPINSIGHTS_KEY")
+
+# Set up logger (do this once, e.g., in your main or startup)
+logger = logging.getLogger("feedback_logger")
+if APPINSIGHTS_KEY:
+    logger.addHandler(AzureLogHandler(connection_string=f'InstrumentationKey={APPINSIGHTS_KEY}'))
+logger.setLevel(logging.INFO)
 
 # Paramètres par défaut si non spécifiés dans le modèle
 MAX_SEQUENCE_LENGTH = 100
@@ -214,6 +222,18 @@ def submit_feedback(feedback: FeedbackRequest):
                 feedback.comments or ""
             ])
 
+        if feedback.is_correct is False:
+            logger.warning(
+                "Model misprediction feedback",
+                extra={
+                    "custom_dimensions": {
+                        "prediction_id": feedback.prediction_id,
+                        "user_comments": feedback.comments,
+                        "actual_sentiment": feedback.actual_sentiment,
+                    }
+                }
+            )
+
         return {
             "message": "Feedback received successfully",
             "feedback_id": feedback.prediction_id,
@@ -246,6 +266,7 @@ def get_feedback_stats():
         correct = sum(1 for f in feedbacks if f['is_correct'].lower() == 'true')
         incorrect = total - correct
         accuracy = (correct / total * 100) if total > 0 else 0
+
 
         return {
             "total_feedback": total,

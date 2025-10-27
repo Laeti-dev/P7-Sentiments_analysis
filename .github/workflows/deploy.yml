@@ -54,7 +54,7 @@ jobs:
     name: Build and Deploy
     needs: test  # Only deploy if tests pass
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
     steps:
       - name: Checkout code

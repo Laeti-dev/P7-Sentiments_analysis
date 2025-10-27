@@ -34,8 +34,4 @@ requests==2.32.3
 # Unit testing
 pytest==8.4.2
 
-# Azure Application Insights
-opencensus-ext-azure==1.1.15
-opencensus-ext-logging==0.1.1
-opencensus-ext-threading==0.1.2
-opencensus-ext-requests==0.8.0
+

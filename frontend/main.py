@@ -172,35 +172,6 @@ if prediction_id:
                 st.session_state['show_correction_form'] = False
                 st.rerun()
 
-# === NEW: Show Model Performance Stats in Sidebar ===
-with st.sidebar:
-    st.markdown("## 📊 Model Performance")
-
-    try:
-        stats_response = requests.get(STATS_URL)
-        if stats_response.status_code == 200:
-            stats = stats_response.json()
-
-            st.metric("Total Feedback", stats['total_feedback'])
-            st.metric("Accuracy", f"{stats['accuracy']}%")
-
-            if stats['total_feedback'] > 0:
-                correct = stats['correct_predictions']
-                incorrect = stats['incorrect_predictions']
-
-                fig_stats = go.Figure(data=[
-                    go.Pie(
-                        labels=['Correct', 'Incorrect'],
-                        values=[correct, incorrect],
-                        marker_colors=['#99ccff', '#ff9999']
-                    )
-                ])
-
-                fig_stats.update_layout(height=250, margin=dict(t=0, b=0, l=0, r=0))
-                st.plotly_chart(fig_stats, use_container_width=True)
-    except:
-        st.info("Stats will appear after feedback is collected")
-
 # Add information about how the model works
 with st.expander("How does this work?"):
     st.markdown("""

@@ -12,8 +12,8 @@ import tensorflow as tf
 from contextlib import asynccontextmanager
 import uuid
 from dotenv import load_dotenv
-import logging
 from opencensus.ext.azure.log_exporter import AzureLogHandler
+import logging
 
 load_dotenv()
 
@@ -27,6 +27,8 @@ logger = logging.getLogger("feedback_logger")
 if APPINSIGHTS_KEY:
     logger.addHandler(AzureLogHandler(connection_string=f'InstrumentationKey={APPINSIGHTS_KEY}'))
 logger.setLevel(logging.INFO)
+
+
 
 # Paramètres par défaut si non spécifiés dans le modèle
 MAX_SEQUENCE_LENGTH = 100
@@ -205,6 +207,7 @@ def submit_feedback(feedback: FeedbackRequest):
     Submit user feedback about a prediction
     """
     print(f"Feedback received: {feedback.dict()}")  # Debugging log
+
     try:
         timestamp = datetime.now().isoformat()
 

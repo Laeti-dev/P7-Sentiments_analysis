@@ -13,15 +13,15 @@ These goals align to enhance an expertise in AI development, focusing on both th
 ## 2. Project structure
 ```txt
 P7-sentiments_analysis/
-├── notebooks/              # Notebooks Jupyter pour l’exploration
-│   ├── ikusawa_laetitia_1_API_092025.ipynb #TODO
+├── notebooks/              
+│   ├── ikusawa_laetitia_1_API_092025.ipynb
 │   ├── ikusawa_laetitia_2_scripts_notebook_modélisation_092025/
 │   │   ├── P7_basic_ML_models.ipynb
 │   │   ├── P7_eda.ipynb
-│   │   ├── P7_advanced_model.ipynb #TODO
-│   │   ├── P7_BERT.ipynb #TODO
+│   │   ├── P7_advanced_model.ipynb
+│   │   ├── P7_BERT.ipynb
 │   └── ikusawa_laetitia_3_dossier_code_092025 #TODO
-│   ├── ikusawa_laetitia_4_interface_test_API_092025 #TODO
+│   ├── ikusawa_laetitia_4_interface_test_API_092025
 │   ├── ikusawa_laetitia_5_blog_092025 #TODO
 ├── requirements.txt
 ├── README.md

@@ -6,7 +6,6 @@ import re
 from datetime import datetime
 import csv
 from pathlib import Path
-import numpy as np
 from typing import Dict, Optional
 import tensorflow as tf
 from contextlib import asynccontextmanager
@@ -14,12 +13,22 @@ import uuid
 from dotenv import load_dotenv
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 import logging
+import mlflow
+from mlflow import artifacts as mlflow_artifacts
+from mlflow.tracking import MlflowClient
 
 load_dotenv()
 
-# Configuration de MLflow
+# MLflow configuration
 mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI")
+if mlflow_tracking_uri:
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
+
 run_id = os.getenv("RUN_ID")
+model_registry_uri = os.getenv("MLFLOW_MODEL_URI")
+artifact_subpath = os.getenv("MODEL_ARTIFACT_PATH", "model")
+model_filename = os.getenv("MODEL_FILENAME", "Bidirectional_GRU_glove_model.h5")
+tokenizer_filename = os.getenv("TOKENIZER_FILENAME", "tokenizer.pkl")
 APPINSIGHTS_KEY = os.getenv("APPINSIGHTS_KEY")
 
 # Set up logger (do this once, e.g., in your main or startup)
@@ -30,13 +39,15 @@ logger.setLevel(logging.INFO)
 
 
 
-# Paramètres par défaut si non spécifiés dans le modèle
+# Default preprocessing configuration
 MAX_SEQUENCE_LENGTH = 100
 
-# Répertoire local pour sauvegarder les artefacts du modèle
+# Local directory used to cache model artifacts
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "model"
 MODEL_DIR.mkdir(exist_ok=True)
+MODEL_PATH = MODEL_DIR / model_filename
+TOKENIZER_PATH = MODEL_DIR / tokenizer_filename
 
 # Feedback storage path
 FEEDBACK_DIR = BASE_DIR / "feedback"
@@ -94,9 +105,6 @@ class FeedbackRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 # Load the pre-trained model and tokenizer
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "model", "Bidirectional_GRU_glove_model.h5")
-TOKENIZER_PATH = os.path.join(os.path.dirname(__file__), "model", "tokenizer.pkl")
-
 model = None  # --- IGNORE ---
 tokenizer = None
 
@@ -111,26 +119,46 @@ def preprocess_text(text:str)-> str:
     text = re.sub(r"@\w+", "USER", text)
     return text
 
+def ensure_model_artifacts():
+    """
+    Ensure model artifacts are available locally. Downloads them from MLflow if required.
+    """
+    if MODEL_PATH.exists() and TOKENIZER_PATH.exists():
+        return
+
+    if model_registry_uri:
+        logger.info(
+            "Downloading artifacts from MLflow Model Registry",
+            extra={"model_uri": model_registry_uri}
+        )
+        mlflow_artifacts.download_artifacts(model_registry_uri, dst_path=str(BASE_DIR))
+    elif run_id and mlflow_tracking_uri:
+        logger.info(
+            "Downloading artifacts from MLflow run",
+            extra={"run_id": run_id, "artifact_path": artifact_subpath}
+        )
+        client = MlflowClient()
+        client.download_artifacts(run_id, artifact_subpath, dst_path=str(BASE_DIR))
+    else:
+        logger.warning("No MLflow configuration found; expecting local artifacts")
+
 def load_model_and_tokenizer():
     """Load model and tokenizer from specified paths"""
     global model, tokenizer
     try:
-        print(f"Looking for model at: {MODEL_PATH}")
-        print(f"Looking for tokenizer at: {TOKENIZER_PATH}")
-        for path in [MODEL_PATH, TOKENIZER_PATH]:
-            if not os.path.exists(path):
-                raise FileNotFoundError(f"File not found: {path}")
+        ensure_model_artifacts()
 
-        try:
-            model = tf.keras.models.load_model(str(MODEL_PATH))
-        except Exception as e:
-            print(f"Model loading error: {e}")
-            raise RuntimeError(f"Model loading error: {e}")
+        if not MODEL_PATH.exists():
+            raise FileNotFoundError(f"File not found: {MODEL_PATH}")
+        if not TOKENIZER_PATH.exists():
+            raise FileNotFoundError(f"File not found: {TOKENIZER_PATH}")
+
+        model = tf.keras.models.load_model(str(MODEL_PATH))
 
         with open(TOKENIZER_PATH, 'rb') as f:
             tokenizer = pickle.load(f)
 
-        print("Model and tokenizer loaded successfully")
+        logger.info("Model and tokenizer loaded successfully")
 
         return {
             "model": model,
@@ -140,7 +168,7 @@ def load_model_and_tokenizer():
     except Exception as e:
         model = None
         tokenizer = None
-        print(f"Error loading model or tokenizer: {str(e)}")
+        logger.error("Error loading model or tokenizer", exc_info=e)
 
 # Load model and tokenizer at startup
 load_model_and_tokenizer()

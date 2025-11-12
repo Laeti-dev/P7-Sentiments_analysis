@@ -1,8 +1,41 @@
+import csv
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
+
+from app import main as app_main
 from app.main import app
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def override_feedback_storage(monkeypatch, tmp_path):
+    """Use a temporary feedback storage for each test run."""
+    feedback_dir = tmp_path / "feedback"
+    feedback_dir.mkdir()
+    feedback_file = feedback_dir / "feedback_log.csv"
+
+    monkeypatch.setattr(app_main, "FEEDBACK_DIR", feedback_dir)
+    monkeypatch.setattr(app_main, "FEEDBACK_FILE", feedback_file)
+
+    with feedback_file.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "prediction_id",
+                "timestamp",
+                "text",
+                "predicted_sentiment",
+                "confidence",
+                "is_correct",
+                "actual_sentiment",
+                "user_comments",
+            ]
+        )
+
+    yield
 
 
 class TestHealthEndpoint:
@@ -104,10 +137,89 @@ class TestPredictEndpoint:
 
 
 class TestModelValidation:
-    """Test model loading and validation"""
+    """Test model loading, feedback and statistics endpoints"""
 
     def test_model_loaded(self):
         """Verify model is loaded on startup"""
-        from app.main import model, tokenizer
-        assert model is not None, "Model should be loaded"
-        assert tokenizer is not None, "Tokenizer should be loaded"
+        assert app_main.model is not None, "Model should be loaded"
+        assert app_main.tokenizer is not None, "Tokenizer should be loaded"
+
+    def test_predict_returns_500_when_model_missing(self, monkeypatch):
+        """Ensure API fails gracefully when model is not available"""
+        original_model = app_main.model
+        original_tokenizer = app_main.tokenizer
+        monkeypatch.setattr(app_main, "model", None)
+        monkeypatch.setattr(app_main, "tokenizer", original_tokenizer)
+
+        response = client.post(
+            "/predict",
+            json={"text": "Any input should fail when model is missing"},
+        )
+
+        assert response.status_code == 500
+        assert "Model or tokenizer not loaded" in response.json()["detail"]
+
+        monkeypatch.setattr(app_main, "model", original_model)
+
+    def test_submit_feedback_success(self):
+        """Feedback endpoint should append a row and return metadata"""
+        payload = {
+            "prediction_id": str(uuid.uuid4()),
+            "is_correct": False,
+            "actual_sentiment": "negative",
+            "comments": "Model predicted positive on a clearly negative tweet.",
+        }
+
+        response = client.post("/feedback", json=payload)
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["feedback_id"] == payload["prediction_id"]
+
+        with app_main.FEEDBACK_FILE.open(encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+
+        assert any(row["prediction_id"] == payload["prediction_id"] for row in rows)
+
+    def test_submit_feedback_validation_error(self):
+        """Missing required fields should return 422"""
+        response = client.post(
+            "/feedback",
+            json={"comments": "Missing mandatory fields"},
+        )
+
+        assert response.status_code == 422
+
+    def test_feedback_stats_empty(self):
+        """Stats endpoint should handle empty feedback gracefully"""
+        response = client.get("/feedback/stats")
+        payload = response.json()
+
+        assert response.status_code == 200
+        assert payload["total_feedback"] == 0
+        assert payload["accuracy"] == 0.0
+
+    def test_feedback_stats_counts(self):
+        """Stats endpoint should aggregate feedback entries"""
+        first = {
+            "prediction_id": str(uuid.uuid4()),
+            "is_correct": True,
+            "actual_sentiment": "positive",
+        }
+        second = {
+            "prediction_id": str(uuid.uuid4()),
+            "is_correct": False,
+            "actual_sentiment": "negative",
+            "comments": "Wrong sentiment",
+        }
+
+        client.post("/feedback", json=first)
+        client.post("/feedback", json=second)
+
+        response = client.get("/feedback/stats")
+        payload = response.json()
+
+        assert payload["total_feedback"] == 2
+        assert payload["correct_predictions"] == 1
+        assert payload["incorrect_predictions"] == 1
+        assert payload["accuracy"] == 50.0

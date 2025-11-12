@@ -1,0 +1,81 @@
+<svg width="1200" height="240" viewBox="0 0 1200 240" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .stage { fill: #e6f2ff; stroke: #1f77b4; stroke-width: 2; }
+    .label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; fill: #0b2948; text-anchor: middle; }
+    .subtitle { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; fill: #1f3a66; text-anchor: middle; }
+    .title { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 20px; fill: #0b2948; text-anchor: middle; font-weight: bold; }
+  </style>
+  <rect x="0" y="0" width="1200" height="240" fill="#ffffff"/>
+  <text x="600" y="40" class="title">Air Paradis Sentiment Platform - MLOps Pipeline</text>
+
+  <g transform="translate(60,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Data</text>
+    <text class="subtitle" x="75" y="58">Ingestion</text>
+    <text class="subtitle" x="75" y="76">`data/raw`</text>
+  </g>
+
+  <g transform="translate(210,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Preprocessing</text>
+    <text class="subtitle" x="75" y="58">Cleaning &amp; NLP</text>
+    <text class="subtitle" x="75" y="76">Reusable modules</text>
+  </g>
+
+  <g transform="translate(360,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Experiment</text>
+    <text class="subtitle" x="75" y="58">Tracking</text>
+    <text class="subtitle" x="75" y="76">MLflow runs</text>
+  </g>
+
+  <g transform="translate(510,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Model</text>
+    <text class="subtitle" x="75" y="58">Registry</text>
+    <text class="subtitle" x="75" y="76">Staging/Prod</text>
+  </g>
+
+  <g transform="translate(660,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">CI/CD</text>
+    <text class="subtitle" x="75" y="58">GitHub Actions</text>
+    <text class="subtitle" x="75" y="76">Tests &amp; builds</text>
+  </g>
+
+  <g transform="translate(810,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Serving</text>
+    <text class="subtitle" x="75" y="58">FastAPI</text>
+    <text class="subtitle" x="75" y="76">Docker / Cloud Run</text>
+  </g>
+
+  <g transform="translate(960,80)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="150" height="90" />
+    <text class="label" x="75" y="34">Monitoring</text>
+    <text class="subtitle" x="75" y="58">Azure App</text>
+    <text class="subtitle" x="75" y="76">Insights</text>
+  </g>
+
+  <g transform="translate(450,190)">
+    <rect class="stage" rx="14" ry="14" x="0" y="0" width="300" height="40" />
+    <text class="subtitle" x="150" y="26">Feedback &amp; Retraining | Slack reports | Model drift checks</text>
+  </g>
+
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="6" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#1f77b4" />
+    </marker>
+  </defs>
+
+  <line x1="210" y1="125" x2="360" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="360" y1="125" x2="510" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="510" y1="125" x2="660" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="660" y1="125" x2="810" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="810" y1="125" x2="960" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="960" y1="125" x2="1110" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="1110" y1="125" x2="1110" y2="210" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="1110" y1="210" x2="600" y2="210" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="150" y1="125" x2="210" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="60" y1="125" x2="150" y2="125" stroke="#1f77b4" stroke-width="2" marker-end="url(#arrow)" />
+</svg>

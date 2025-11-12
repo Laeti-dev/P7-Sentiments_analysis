@@ -211,4 +211,6 @@ notebooks/ROC_AUC/
 backend/model/
 
 gcp-key.json
-mlflow-gcs-key.json
+
+*.zip
+Réalisez_une_analyse_de_sentiments_grace_au_deep_learning_ikusawa_laetitia/

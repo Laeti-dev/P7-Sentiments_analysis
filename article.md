@@ -6,7 +6,7 @@ Bonjour à tous,
 
 Dans deux semaines, l’équipe MIC a rendez-vous avec Mme Aline, directrice marketing d’Air Paradis. L’enjeu est clair : convaincre qu’une plateforme d’analyse de sentiments peut détecter les signaux faibles d’un « bad buzz » avant qu’il ne s’emballe sur les réseaux sociaux. Nous ne venons pas les mains vides : en quelques sprints, nous avons transformé un corpus de 1,6 million de tweets en un service industrialisé, monitoré, prêt à être intégré dans leur chaîne de veille. Cet article de 1 800 mots environ (captures à l’appui) synthétise la démarche, compare les trois familles de modèles évaluées, et détaille l’architecture MLOps qui fiabilise le tout, jusqu’au suivi de la performance en production via Azure Application Insights.
 
-![Vue d’ensemble du pipeline](./artifacts/overview_pipeline.svg)
+![Vue d’ensemble du pipeline](./article_artifacts/overview_pipeline.svg)
 
 ## Comprendre le terrain : données et exploration
 
@@ -16,7 +16,7 @@ Avant de parler d’algorithmes, il a fallu prendre la mesure du corpus Sentimen
 - Profil de classe : équilibre parfait 50/50, favorable à des métriques stables, confirmé par la distribution du corpus après nettoyage.
 - Lexique dominant : animations wordcloud, n-grammes et TF-IDF nous ont permis d’extraire les champs lexicaux propres aux humeurs positives (« love », « thanks ») et négatives (« delay », « cancel », « tired »), première intuition utile pour la scénarisation marketing.
 
-![Wordclouds positifs vs négatifs](./artifacts/wordcloud_comparison.png)
+![Wordclouds positifs vs négatifs](./article_artifacts/wordcloud.png)
 
 Ces analyses descriptives sont enregistrées dans `artifacts/` (notamment `eda_wordcloud.png`) et versionnées dans Git, ce qui garantit la traçabilité des hypothèses présentées au client.
 
@@ -43,7 +43,7 @@ Nous avons itéré sur trois familles de modèles, chacune répondant à une con
 - F1-score : 0,75
 - Temps d’inférence CPU : 4,8 ms (moyenne)
 
-![Courbe ROC – modèle simple](./artifacts/roc_NB.png)
+![Courbe ROC – modèle simple](./article_artifacts/rocNB.png)
 
 ### 2. Modèle sur mesure avancé : embeddings + réseaux récurrents
 
@@ -64,7 +64,7 @@ Nous avons itéré sur trois familles de modèles, chacune répondant à une con
 - F1-score : 0,85
 - Temps d’inférence CPU : 18 ms
 
-![TensorBoard – entraînement GRU](./artifacts/learning_curves/learning_curve_Bidirectional_GRU_glove.png)
+![TensorBoard – entraînement GRU](./article_artifacts/learning_curve_Bidirectional_GRU_glove.png)
 
 ### 3. Modèle avancé BERT : le meilleur du transformer
 
@@ -86,7 +86,7 @@ Nous avons itéré sur trois familles de modèles, chacune répondant à une con
 - F1-score : 0,91
 - Temps d’inférence CPU : 65 ms (optimisable par quantification ONNX)
 
-![Confusion matrix – BERT](artifacts/confusion_matrix/confusion_matrix_bert_uncase.png)
+![Confusion matrix – BERT](./article_artifacts/confusion_matrix/confusion_matrix_bert_uncase.png)
 
 ### Synthèse comparative
 
@@ -116,7 +116,6 @@ Nous avons structuré le projet autour des principes MLOps suivants :
 - **Versioning** : hachage SHA des fichiers CSV consigné dans MLflow (paramètre `data_hash`), documentation dans `notebooks/P7_eda.ipynb`. Les scripts d’ingestion exportent un `data_profile.json` (profil pandas-profiling).
 - **Préprocessing** : pipeline Python dans `notebooks/P7_preprocessing.ipynb` puis intégration dans un module réutilisable (`backend/app/main.py` fonction `preprocess_text`). Les transformations sont encapsulées pour garantir un comportement identique en entraînement et en production.
 
-![Profil de données](./artifacts/data_profile.png)
 
 ### Tracking des expériences
 
@@ -124,7 +123,7 @@ Nous avons structuré le projet autour des principes MLOps suivants :
 - **Comparaison automatique** : script `notebooks/utils/compare_runs.py` exporte un leaderboard en Markdown (`artifacts/model_leaderboard.md`) intégré dans les slides de restitution.
 - **Reproductibilité** : `conda.yaml` généré automatiquement pour BERT afin de capturer la configuration transformers/torch.
 
-![MLflow leaderboard](./artifacts/mlflow_leaderboard.png)
+![MLflow leaderboard](./article_artifacts/mlflow_leaderboard.png)
 
 ### Stockage et gestion de versions des modèles
 
@@ -133,7 +132,7 @@ Nous avons structuré le projet autour des principes MLOps suivants :
 - **Versioning Git** : chaque promotion s’accompagne d’un tag (`v1.3.0-gru-prod`) et d’un bump de version dans `backend/app/main.py` (`version="1.0.0"` → futur `1.1.0`).
 - **Packaging** : nous publions des images Docker versionnées (`gcr.io/air-paradis/sentiment-api:<SHA>`), assurant la cohérence entre les environnements.
 
-![MLflow Model Registry](./artifacts/model_registry.png)
+
 
 ### Validation et tests automatisés
 
@@ -142,7 +141,7 @@ Nous avons structuré le projet autour des principes MLOps suivants :
 - **Tests de charge** : Artillery (`scripts/loadtest.yml`) simule 200 requêtes/s pour vérifier la stabilité du service.
 - **Tests BERT spécifiques** : vérification de la compatibilité ONNX (script `scripts/export_onnx.py`) et de la quantification dynamique.
 
-![Résultats pytest](./artifacts/pytest_report.png)
+![Résultats pytest](./article_artifacts/pytest_report.png)
 
 ### Déploiement continu et infrastructure
 
@@ -151,7 +150,7 @@ Nous avons structuré le projet autour des principes MLOps suivants :
 - **Orchestration locale** : `docker-compose.yml` lance FastAPI, Streamlit et MLflow pour les démos clients.
 - **Feature toggles** : variables d’environnement (`.env`) pour activer BERT (`MODEL_VARIANT=bert`) ou revenir à la GRU, sans redéployer l’infrastructure.
 
-![Pipeline CI/CD](./artifacts/cicd_pipeline.png)
+![Pipeline CI/CD](./article_artifacts/cicd_pipeline.png)
 
 ## Monitoring en production avec Azure Application Insights
 
@@ -162,7 +161,7 @@ Nous avons instrumenté l’API FastAPI pour qu’elle remonte ses logs et métr
 - **Dashboards** : un workbook Azure regroupe latence 95e percentile, taux d’erreurs, ratio positif/négatif, tout cela corrélé aux évènements marketing d’Air Paradis.
 - **Export vers Data Lake** : Application Insights alimente un pipeline Azure Synapse où les data analysts peuvent réaliser des analyses hebdomadaires (drift lexical, segmentation par canal).
 
-![Dashboard Application Insights](./artifacts/appinsights_dashboard.png)
+![Dashboard Application Insights](./article_artifacts/appinsights_dashboard.png)
 
 ### Stratégie d’analyse des statistiques et amélioration continue
 
@@ -173,15 +172,14 @@ Pour assurer une amélioration constante du modèle, nous avons défini un proto
 3. **Decide** — Si la dérive dépasse un seuil (Accuracy <0,82 sur une semaine), comité MLOps décide de retrainer la GRU avec les données de feedback intégrées. Pour BERT, une simple mise à jour du learning rate suffit souvent.
 4. **Act** — Lancement du pipeline d’entraînement automatisé (`make retrain`), nouveau run MLflow, validation automatique, promotion éventuelle dans le Model Registry. Tout changement de modèle s’accompagne d’une note de version envoyée au marketing.
 
-![Boucle d’amélioration continue](./artifacts/continuous_improvement.png)
 
 ## Expérience utilisateur : interfaces et feedback
 
 La solution n’est pas uniquement back-end : une interface Streamlit (`frontend/main.py`) permet à Mme Aline et son équipe de tester un tweet, visualiser les probabilités (graphique en barres Plotly) et donner un feedback en un clic. Les captures d’écran suivantes seront intégrées dans le support de présentation :
 
-- ![Interface Streamlit – prédiction](./artifacts/streamlit_prediction.png)
-- ![Interface Streamlit – proba](/artifacts/streamlit_proba.png)
-- ![Interface Streamlit – feedback](./artifacts/streamlit_feedback.png)
+- ![Interface Streamlit – prédiction](./article_artifacts/streamlit_prediction.png)
+- ![Interface Streamlit – proba](./article_artifacts/streamlit_proba.png)
+- ![Interface Streamlit – feedback](./article_artifacts/streamlit_feedback.png)
 
 Chaque feedback alimente `backend/app/feedback/feedback_log.csv`, fichier ensuite synchronisé dans un bucket sécurisé pour réentraînement. Nous respectons la confidentialité en ne stockant pas le texte brut : seules des métadonnées (horodatage, sentiment réel, commentaire optionnel) sont conservées.
 
